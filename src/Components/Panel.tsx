@@ -1,13 +1,15 @@
 import { clsx } from "clsx"
 
 import { ListBox } from "./ListBox"
+import { type DisplayContents } from "../model"
 
 interface PanelProps {
   className?: string;
+  contents: DisplayContents;
 }
 
 export const Panel: React.FC<PanelProps> = ({
-  className,
+  className, contents,
 }) => {
   return (
     <div
@@ -23,14 +25,15 @@ export const Panel: React.FC<PanelProps> = ({
         <div className={clsx(
           "w-1/2",
         )}>
-          <ListBox />
+          <ListBox treeNode={contents.treeNode} />
         </div>
         <div className={clsx(
           "w-1/2",
           "flex", "items-center"
         )}>
-          {/*  TODO: fix this */}
-          <img src="https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png" />
+          {contents.coverUri && (
+            <img src={contents.coverUri} />
+          )}
         </div>
       </div>
     </div>
