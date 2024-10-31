@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { clsx } from "clsx";
+import { type ClickWheelerRotateEvent } from "click-wheeler";
 
 import { Panel } from "./Components/Panel";
 import { ClickWheeler } from "./Components/ClickWheeler";
@@ -32,6 +34,21 @@ const contents: DisplayContents = {
 };
 
 export const App: React.FC<unknown> = () => {
+  const [selectedIndex, setSelectedIndex] = useState<number>(0);
+
+  const onRotate = (e: ClickWheelerRotateEvent) => {
+    if (!contents.treeNode.children) {
+      return;
+    }
+
+    const lastIndex = contents.treeNode.children.length - 1;
+    const nextIndex = Math.min(
+      lastIndex,
+      Math.max(0, selectedIndex + (e.detail.direction === "clockwise" ? 1 : -1)),
+    );
+    setSelectedIndex(nextIndex);
+  };
+
   return (
     <main className={clsx("w-screen", "h-screen", "flex", "justify-center", "items-center")}>
       <div
@@ -51,10 +68,12 @@ export const App: React.FC<unknown> = () => {
         <Panel
           className={clsx("h-45p")}
           contents={contents}
+          selectedIndex={selectedIndex}
         />
         <ClickWheeler
           size={220}
           className={clsx("flex-grow")}
+          onRotate={onRotate}
         />
       </div>
     </main>
