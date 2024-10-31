@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { clsx } from "clsx";
-import { type ClickWheelerRotateEvent } from "click-wheeler";
+import { type ClickWheelerRotateEvent, type ClickWheelerTapEvent } from "click-wheeler";
 
 import { Panel } from "./Components/Panel";
 import { ClickWheeler } from "./Components/ClickWheeler";
@@ -49,6 +49,12 @@ export const App: React.FC<unknown> = () => {
     setSelectedIndex(nextIndex);
   };
 
+  const onTap = (e: ClickWheelerTapEvent) => {
+    const name = contents.treeNode.children ? contents.treeNode.children[selectedIndex] : "";
+    const str = `${name}, ${e.detail.tapArea}, ${e.detail.type}`;
+    alert(str);
+  };
+
   return (
     <main className={clsx("w-screen", "h-screen", "flex", "justify-center", "items-center")}>
       <div
@@ -74,6 +80,7 @@ export const App: React.FC<unknown> = () => {
           size={220}
           className={clsx("flex-grow")}
           onRotate={onRotate}
+          onTap={onTap}
         />
       </div>
     </main>
