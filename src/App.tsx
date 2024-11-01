@@ -61,8 +61,8 @@ export const App: React.FC<unknown> = () => {
         className={clsx(
           "flex",
           "flex-col",
-          "w-80",
-          "h-128",
+          "w-88",
+          "h-136",
           "rounded-2xl",
           "p-4",
           "bg-gradient-to-b",
@@ -77,7 +77,7 @@ export const App: React.FC<unknown> = () => {
           selectedIndex={selectedIndex}
         />
         <ClickWheeler
-          size={220}
+          size={240}
           className={clsx("flex-grow")}
           onRotate={onRotate}
           onTap={onTap}
