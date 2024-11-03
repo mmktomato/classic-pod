@@ -5,18 +5,18 @@ import { type TreeNode } from "../model";
 
 interface PanelProps {
   className?: string;
-  contents: TreeNode;
+  contents: TreeNode[];
   selectedIndex: number;
 }
 
 export const Panel: React.FC<PanelProps> = ({ className, contents, selectedIndex }) => {
-  const selectedItem = contents.children?.at(selectedIndex);
+  const selectedItem = contents.at(selectedIndex);
   return (
     <div className={clsx(className, "bg-white", "border-2", "rounded-md", "border-gray-600")}>
       <div className={clsx("flex", "justify-between", "h-full", "rounded-sm")}>
         <div className={clsx("w-1/2")}>
           <ListBox
-            treeNode={contents}
+            treeNodes={contents}
             selectedIndex={selectedIndex}
           />
         </div>

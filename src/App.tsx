@@ -5,9 +5,10 @@ import { type ClickWheelerRotateEvent, type ClickWheelerTapEvent } from "click-w
 import { Panel } from "./Components/Panel";
 import { ClickWheeler } from "./Components/ClickWheeler";
 import { type TreeNode } from "./model";
+import { useDirectoryBrowse } from "./hooks";
 
 // TODO: fix this
-const demo: TreeNode = {
+const sample: TreeNode = {
   name: "To Pimp a Butterfly",
   children: [
     {
@@ -94,22 +95,20 @@ const demo: TreeNode = {
 };
 
 // TODO: fix this
-const topMenu: TreeNode = {
-  name: "Top Menu",
-  children: [{ name: "Demo", children: [demo] }, { name: "Scan" }],
-};
+const topMenu: TreeNode[] = [{ name: "Sample", children: [sample] }, { name: "Scan" }];
 
 export const App: React.FC<unknown> = () => {
   // TODO: Move to a hook.
-  const [contents, setContents] = useState<TreeNode>(topMenu);
+  const [contents, setContents] = useState<TreeNode[]>(topMenu);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
+  const { isShowDirectoryPickerSupported, browseDirectory } = useDirectoryBrowse();
+
   const onRotate = (e: ClickWheelerRotateEvent) => {
-    if (!contents.children) {
+    if (!contents.length) {
       return;
     }
-
-    const lastIndex = contents.children.length - 1;
+    const lastIndex = contents.length - 1;
     const nextIndex = Math.min(
       lastIndex,
       Math.max(0, selectedIndex + (e.detail.direction === "clockwise" ? 1 : -1)),
@@ -118,7 +117,32 @@ export const App: React.FC<unknown> = () => {
   };
 
   const onTap = (e: ClickWheelerTapEvent) => {
-    const name = contents.children?.at(selectedIndex)?.name || "";
+    // TODO: fix this
+    const selectedItem = contents[selectedIndex];
+    switch (selectedItem.name) {
+      case "Sample":
+      case "To Pimp a Butterfly":
+        setContents(selectedItem.children || []);
+        setSelectedIndex(0);
+        return;
+      case "Scan":
+        if (!isShowDirectoryPickerSupported) {
+          // TODO: fallback to <input type="file" webkitdirectory />.
+          alert("Directory picker is not supported.");
+          return;
+        }
+        browseDirectory().then(async handle => {
+          const entries = handle?.entries();
+          if (entries) {
+            for await (const [key, value] of entries) {
+              console.log(key, value);
+            }
+          }
+          alert(`${handle?.name}, see console for details.`);
+        });
+        return;
+    }
+    const name = selectedItem?.name || "";
     const str = `${name}, ${e.detail.tapArea}, ${e.detail.type}`;
     alert(str);
   };
@@ -141,7 +165,7 @@ export const App: React.FC<unknown> = () => {
       >
         <Panel
           className={clsx("h-45p")}
-          contents={topMenu}
+          contents={contents}
           selectedIndex={selectedIndex}
         />
         <ClickWheeler

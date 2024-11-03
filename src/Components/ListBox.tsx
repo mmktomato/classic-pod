@@ -4,11 +4,11 @@ import { clsx } from "clsx";
 import { type TreeNode } from "../model";
 
 interface ListBoxProps {
-  treeNode: TreeNode;
+  treeNodes: TreeNode[];
   selectedIndex: number;
 }
 
-export const ListBox: React.FC<ListBoxProps> = ({ treeNode, selectedIndex }) => {
+export const ListBox: React.FC<ListBoxProps> = ({ treeNodes, selectedIndex }) => {
   const [prevSelectedIndex, setPrevSelectedIndex] = useState(selectedIndex);
   const ref = useRef<HTMLUListElement>(null);
 
@@ -30,7 +30,7 @@ export const ListBox: React.FC<ListBoxProps> = ({ treeNode, selectedIndex }) => 
         className={clsx("min-h-0", "overflow-y-scroll", "overflow-x-hidden")}
         ref={ref}
       >
-        {treeNode.children?.map((child, i) => (
+        {treeNodes.map((treeNode, i) => (
           <li
             key={i}
             className={clsx("whitespace-nowrap", "pl-1", {
@@ -38,7 +38,7 @@ export const ListBox: React.FC<ListBoxProps> = ({ treeNode, selectedIndex }) => 
               "text-white": i === selectedIndex,
             })}
           >
-            {typeof child === "string" ? child : child.name}
+            {treeNode.name}
           </li>
         ))}
       </ul>
