@@ -4,44 +4,112 @@ import { type ClickWheelerRotateEvent, type ClickWheelerTapEvent } from "click-w
 
 import { Panel } from "./Components/Panel";
 import { ClickWheeler } from "./Components/ClickWheeler";
-import { type DisplayContents } from "./model";
+import { type TreeNode } from "./model";
 
 // TODO: fix this
-const contents: DisplayContents = {
-  treeNode: {
-    name: "To Pimp a Butterfly",
-    children: [
-      "Wesley's Theory (featuring George Clinton and Thundercat)",
-      "For Free? (Interlude)",
-      "King Kunta",
-      "Institutionalized (featuring Bilal, Anna Wise and Snoop Dogg)",
-      "These Walls (featuring Bilal, Anna Wise and Thundercat)",
-      "U",
-      "Alright",
-      "For Sale? (Interlude)",
-      "Momma",
-      "Hood Politics",
-      "How Much a Dollar Cost (featuring James Fauntleroy and Ronald Isley)",
-      "Complexion (A Zulu Love) (featuring Rapsody)",
-      "The Blacker the Berry",
-      "You Ain't Gotta Lie (Momma Said)",
-      "I",
-      "Mortal Man",
-    ],
-  },
-  coverUri:
-    "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
+const demo: TreeNode = {
+  name: "To Pimp a Butterfly",
+  children: [
+    {
+      name: "Wesley's Theory (featuring George Clinton and Thundercat)",
+      imageUri:
+        "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
+    },
+    {
+      name: "For Free? (Interlude)",
+      imageUri:
+        "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
+    },
+    {
+      name: "King Kunta",
+      imageUri:
+        "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
+    },
+    {
+      name: "Institutionalized (featuring Bilal, Anna Wise and Snoop Dogg)",
+      imageUri:
+        "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
+    },
+    {
+      name: "These Walls (featuring Bilal, Anna Wise and Thundercat)",
+      imageUri:
+        "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
+    },
+    {
+      name: "U",
+      imageUri:
+        "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
+    },
+    {
+      name: "Alright",
+      imageUri:
+        "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
+    },
+    {
+      name: "For Sale? (Interlude)",
+      imageUri:
+        "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
+    },
+    {
+      name: "Momma",
+      imageUri:
+        "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
+    },
+    {
+      name: "Hood Politics",
+      imageUri:
+        "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
+    },
+    {
+      name: "How Much a Dollar Cost (featuring James Fauntleroy and Ronald Isley)",
+      imageUri:
+        "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
+    },
+    {
+      name: "Complexion (A Zulu Love) (featuring Rapsody)",
+      imageUri:
+        "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
+    },
+    {
+      name: "The Blacker the Berry",
+      imageUri:
+        "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
+    },
+    {
+      name: "You Ain't Gotta Lie (Momma Said)",
+      imageUri:
+        "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
+    },
+    {
+      name: "I",
+      imageUri:
+        "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
+    },
+    {
+      name: "Mortal Man",
+      imageUri:
+        "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
+    },
+  ],
+};
+
+// TODO: fix this
+const topMenu: TreeNode = {
+  name: "Top Menu",
+  children: [{ name: "Demo", children: [demo] }, { name: "Scan" }],
 };
 
 export const App: React.FC<unknown> = () => {
+  // TODO: Move to a hook.
+  const [contents, setContents] = useState<TreeNode>(topMenu);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
   const onRotate = (e: ClickWheelerRotateEvent) => {
-    if (!contents.treeNode.children) {
+    if (!contents.children) {
       return;
     }
 
-    const lastIndex = contents.treeNode.children.length - 1;
+    const lastIndex = contents.children.length - 1;
     const nextIndex = Math.min(
       lastIndex,
       Math.max(0, selectedIndex + (e.detail.direction === "clockwise" ? 1 : -1)),
@@ -50,7 +118,7 @@ export const App: React.FC<unknown> = () => {
   };
 
   const onTap = (e: ClickWheelerTapEvent) => {
-    const name = contents.treeNode.children ? contents.treeNode.children[selectedIndex] : "";
+    const name = contents.children?.at(selectedIndex)?.name || "";
     const str = `${name}, ${e.detail.tapArea}, ${e.detail.type}`;
     alert(str);
   };
@@ -73,7 +141,7 @@ export const App: React.FC<unknown> = () => {
       >
         <Panel
           className={clsx("h-45p")}
-          contents={contents}
+          contents={topMenu}
           selectedIndex={selectedIndex}
         />
         <ClickWheeler
