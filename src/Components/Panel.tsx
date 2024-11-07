@@ -1,11 +1,11 @@
 import { clsx } from "clsx";
 
 import { ListBox } from "./ListBox";
-import { type TreeNode } from "../model";
+import { type DisplayNode, Song } from "../model";
 
 interface PanelProps {
   className?: string;
-  contents: TreeNode[];
+  contents: DisplayNode[] | Song[];
   selectedIndex: number;
 }
 
@@ -21,7 +21,9 @@ export const Panel: React.FC<PanelProps> = ({ className, contents, selectedIndex
           />
         </div>
         <div className={clsx("w-1/2", "flex", "items-center")}>
-          {selectedItem?.imageUri && <img src={selectedItem.imageUri} />}
+          {selectedItem && "imageUri" in selectedItem && selectedItem.imageUri && (
+            <img src={selectedItem.imageUri} />
+          )}
         </div>
       </div>
     </div>

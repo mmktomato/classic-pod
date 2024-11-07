@@ -1,10 +1,10 @@
 import { useRef, useState, useEffect } from "react";
 import { clsx } from "clsx";
 
-import { type TreeNode } from "../model";
+import { type DisplayNode } from "../model";
 
 interface ListBoxProps {
-  treeNodes: TreeNode[];
+  treeNodes: DisplayNode[];
   selectedIndex: number;
 }
 

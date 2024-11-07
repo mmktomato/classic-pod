@@ -4,102 +4,125 @@ import { type ClickWheelerRotateEvent, type ClickWheelerTapEvent } from "click-w
 
 import { Panel } from "./Components/Panel";
 import { ClickWheeler } from "./Components/ClickWheeler";
-import { type TreeNode } from "./model";
-import { useDirectoryBrowse } from "./hooks";
+import { type Song, AlbumNode, ArtistNode, DisplayNode } from "./model";
+import { useDirectoryBrowse, createMusicLibrary } from "./hooks";
 
 // TODO: fix this
-const sample: TreeNode = {
-  name: "To Pimp a Butterfly",
-  children: [
-    {
-      name: "Wesley's Theory (featuring George Clinton and Thundercat)",
-      imageUri:
-        "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
-    },
-    {
-      name: "For Free? (Interlude)",
-      imageUri:
-        "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
-    },
-    {
-      name: "King Kunta",
-      imageUri:
-        "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
-    },
-    {
-      name: "Institutionalized (featuring Bilal, Anna Wise and Snoop Dogg)",
-      imageUri:
-        "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
-    },
-    {
-      name: "These Walls (featuring Bilal, Anna Wise and Thundercat)",
-      imageUri:
-        "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
-    },
-    {
-      name: "U",
-      imageUri:
-        "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
-    },
-    {
-      name: "Alright",
-      imageUri:
-        "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
-    },
-    {
-      name: "For Sale? (Interlude)",
-      imageUri:
-        "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
-    },
-    {
-      name: "Momma",
-      imageUri:
-        "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
-    },
-    {
-      name: "Hood Politics",
-      imageUri:
-        "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
-    },
-    {
-      name: "How Much a Dollar Cost (featuring James Fauntleroy and Ronald Isley)",
-      imageUri:
-        "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
-    },
-    {
-      name: "Complexion (A Zulu Love) (featuring Rapsody)",
-      imageUri:
-        "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
-    },
-    {
-      name: "The Blacker the Berry",
-      imageUri:
-        "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
-    },
-    {
-      name: "You Ain't Gotta Lie (Momma Said)",
-      imageUri:
-        "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
-    },
-    {
-      name: "I",
-      imageUri:
-        "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
-    },
-    {
-      name: "Mortal Man",
-      imageUri:
-        "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
-    },
-  ],
-};
-
-// TODO: fix this
-const topMenu: TreeNode[] = [{ name: "Sample", children: [sample] }, { name: "Scan" }];
+const songs: Song[] = [
+  {
+    name: "Wesley's Theory (featuring George Clinton and Thundercat)",
+    imageUri:
+      "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
+    duration: 0,
+  },
+  {
+    name: "For Free? (Interlude)",
+    imageUri:
+      "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
+    duration: 0,
+  },
+  {
+    name: "King Kunta",
+    imageUri:
+      "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
+    duration: 0,
+  },
+  {
+    name: "Institutionalized (featuring Bilal, Anna Wise and Snoop Dogg)",
+    imageUri:
+      "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
+    duration: 0,
+  },
+  {
+    name: "These Walls (featuring Bilal, Anna Wise and Thundercat)",
+    imageUri:
+      "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
+    duration: 0,
+  },
+  {
+    name: "U",
+    imageUri:
+      "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
+    duration: 0,
+  },
+  {
+    name: "Alright",
+    imageUri:
+      "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
+    duration: 0,
+  },
+  {
+    name: "For Sale? (Interlude)",
+    imageUri:
+      "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
+    duration: 0,
+  },
+  {
+    name: "Momma",
+    imageUri:
+      "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
+    duration: 0,
+  },
+  {
+    name: "Hood Politics",
+    imageUri:
+      "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
+    duration: 0,
+  },
+  {
+    name: "How Much a Dollar Cost (featuring James Fauntleroy and Ronald Isley)",
+    imageUri:
+      "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
+    duration: 0,
+  },
+  {
+    name: "Complexion (A Zulu Love) (featuring Rapsody)",
+    imageUri:
+      "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
+    duration: 0,
+  },
+  {
+    name: "The Blacker the Berry",
+    imageUri:
+      "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
+    duration: 0,
+  },
+  {
+    name: "You Ain't Gotta Lie (Momma Said)",
+    imageUri:
+      "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
+    duration: 0,
+  },
+  {
+    name: "I",
+    imageUri:
+      "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
+    duration: 0,
+  },
+  {
+    name: "Mortal Man",
+    imageUri:
+      "https://upload.wikimedia.org/wikipedia/en/f/f6/Kendrick_Lamar_-_To_Pimp_a_Butterfly.png",
+    duration: 0,
+  },
+];
+const albums: AlbumNode[] = [
+  {
+    name: "To Pimp a Butterfly",
+    children: songs,
+  },
+];
+const artists: ArtistNode[] = [
+  {
+    name: "Kendrick Lamar",
+    children: albums,
+  },
+];
+const topMenu: DisplayNode[] = [{ name: "Artists", children: artists }, { name: "Scan" }];
 
 export const App: React.FC<unknown> = () => {
   // TODO: Move to a hook.
-  const [contents, setContents] = useState<TreeNode[]>(topMenu);
+  const [contents, setContents] = useState<DisplayNode[]>(topMenu);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
 
   const { isShowDirectoryPickerSupported, browseDirectory } = useDirectoryBrowse();
@@ -120,7 +143,8 @@ export const App: React.FC<unknown> = () => {
     // TODO: fix this
     const selectedItem = contents[selectedIndex];
     switch (selectedItem.name) {
-      case "Sample":
+      case "Artists":
+      case "Kendrick Lamar":
       case "To Pimp a Butterfly":
         setContents(selectedItem.children || []);
         setSelectedIndex(0);
@@ -132,13 +156,11 @@ export const App: React.FC<unknown> = () => {
           return;
         }
         browseDirectory().then(async handle => {
-          const entries = handle?.entries();
-          if (entries) {
-            for await (const [key, value] of entries) {
-              console.log(key, value);
-            }
+          if (handle) {
+            const lib = await createMusicLibrary(handle);
+            alert(`${handle.name}, see console for details.`);
+            console.log(lib);
           }
-          alert(`${handle?.name}, see console for details.`);
         });
         return;
     }
