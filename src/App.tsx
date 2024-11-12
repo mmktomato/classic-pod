@@ -5,7 +5,8 @@ import { type ClickWheelerRotateEvent, type ClickWheelerTapEvent } from "click-w
 import { Panel } from "./Components/Panel";
 import { ClickWheeler } from "./Components/ClickWheeler";
 import { type Song, AlbumNode, ArtistNode, DisplayNode } from "./model";
-import { useDirectoryBrowse, createMusicLibrary } from "./hooks";
+import { useDirectoryBrowse } from "./hooks";
+import { createMusicLibrary } from "./Modules/library";
 
 // TODO: fix this
 const songs: Song[] = [
@@ -158,8 +159,8 @@ export const App: React.FC<unknown> = () => {
         browseDirectory().then(async handle => {
           if (handle) {
             const lib = await createMusicLibrary(handle);
-            alert(`${handle.name}, see console for details.`);
             console.log(lib);
+            alert(`${handle.name}, see console for details.`);
           }
         });
         return;
