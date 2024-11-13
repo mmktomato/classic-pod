@@ -1,9 +1,9 @@
 import { parseBlob, type IAudioMetadata } from "music-metadata";
 
-import { type ArtistNode } from "../model";
+import { type Artist } from "../model";
 
 export const createMusicLibrary = async (rootDirectoryHandle: FileSystemDirectoryHandle) => {
-  const lib: ArtistNode[] = [];
+  const lib: Artist[] = [];
 
   await findMusicFiles(rootDirectoryHandle, async handle => {
     const file = await handle.getFile();
@@ -34,7 +34,7 @@ const findMusicFiles = async (
   }
 };
 
-const addSong = async (lib: ArtistNode[], metadata: IAudioMetadata) => {
+const addSong = async (lib: Artist[], metadata: IAudioMetadata) => {
   const albumArtistStr = metadata.common.albumartist || "(unknown)";
   const albumTitleStr = metadata.common.album || "(unknown)";
   const songTitleStr = metadata.common.title || "(unknown)";
@@ -43,22 +43,18 @@ const addSong = async (lib: ArtistNode[], metadata: IAudioMetadata) => {
   if (!artist) {
     artist = {
       name: albumArtistStr,
+      children: [],
     };
     lib.push(artist);
-  }
-  if (!artist.children) {
-    artist.children = [];
   }
 
   let album = artist.children.find(album => album.name === albumTitleStr);
   if (!album) {
     album = {
       name: albumTitleStr,
+      children: [],
     };
     artist.children.push(album);
-  }
-  if (!album.children) {
-    album.children = [];
   }
 
   album.children.push({

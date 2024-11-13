@@ -1,14 +1,14 @@
 import { useRef, useState, useEffect } from "react";
 import { clsx } from "clsx";
 
-import { type DisplayNode } from "../model";
+import { type NavigationNode } from "../model";
 
 interface ListBoxProps {
-  treeNodes: DisplayNode[];
+  navigation: NavigationNode[];
   selectedIndex: number;
 }
 
-export const ListBox: React.FC<ListBoxProps> = ({ treeNodes, selectedIndex }) => {
+export const ListBox: React.FC<ListBoxProps> = ({ navigation, selectedIndex }) => {
   const [prevSelectedIndex, setPrevSelectedIndex] = useState(selectedIndex);
   const ref = useRef<HTMLUListElement>(null);
 
@@ -30,7 +30,7 @@ export const ListBox: React.FC<ListBoxProps> = ({ treeNodes, selectedIndex }) =>
         className={clsx("min-h-0", "overflow-y-scroll", "overflow-x-hidden")}
         ref={ref}
       >
-        {treeNodes.map((treeNode, i) => (
+        {navigation.map((navigationNode, i) => (
           <li
             key={i}
             className={clsx("whitespace-nowrap", "pl-1", {
@@ -38,7 +38,7 @@ export const ListBox: React.FC<ListBoxProps> = ({ treeNodes, selectedIndex }) =>
               "text-white": i === selectedIndex,
             })}
           >
-            {treeNode.name}
+            {navigationNode.name}
           </li>
         ))}
       </ul>

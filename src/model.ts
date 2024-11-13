@@ -1,16 +1,23 @@
-interface TreeNode<T> {
+export interface NavigationNode {
   name: string;
-  children?: T[];
+  command: () => Promise<void>;
+  imageUri?: string;
 }
-
-export type DisplayNode = TreeNode<DisplayNode>;
-
-export type ArtistNode = TreeNode<AlbumNode>;
-
-export type AlbumNode = TreeNode<Song>;
 
 export interface Song {
   name: string;
   imageUri?: string; // TODO: Should be a buffer or blob.
   duration: number;
+}
+
+interface WithChildren<T> {
+  children: T[];
+}
+
+export interface Album extends WithChildren<Song> {
+  name: string;
+}
+
+export interface Artist extends WithChildren<Album> {
+  name: string;
 }
