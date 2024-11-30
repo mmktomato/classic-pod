@@ -1,63 +1,119 @@
+import { AlbumEntity, ArtistEntity, SongEntity } from "../model";
+
 const version = 1;
 let db: IDBDatabase | null = null;
 
-export const openDb = () => {
-  const openReq = window.indexedDB.open("classic-pod", version);
-
-  openReq.addEventListener("error", e => {
-    console.error("IndexDB open error:", e);
-  });
-
-  openReq.addEventListener("success", () => {
-    db = openReq.result;
-    console.log("IndexDB opened:");
-  });
-
-  openReq.addEventListener("upgradeneeded", e => {
-    db = openReq.result;
-    console.log(`old: ${e.oldVersion}, new: ${e.newVersion}`);
-
-    db.createObjectStore("artists", { autoIncrement: true });
-
-    const albumStore = db.createObjectStore("albums", { autoIncrement: true });
-    albumStore.createIndex("artist", "artist", { unique: false });
-
-    const songStore = db.createObjectStore("songs", { autoIncrement: true });
-    songStore.createIndex("artist-album", ["artist", "album"], { unique: false });
-  });
-};
-
-export const addArtist = (artistName: string) => {
-  if (!db) {
-    return;
+const rejectIfDbIsNotOpened = (
+  _db: IDBDatabase | null,
+  reject: (reason?: unknown) => void,
+): _db is IDBDatabase => {
+  if (!_db) {
+    reject(new Error("db is not opened."));
+    return false;
   }
-
-  const value = { name: artistName };
-  db.transaction("artists", "readwrite").objectStore("artists").add(value);
+  return true;
 };
 
-export const addAlbum = (artistName: string, albumName: string) => {
-  if (!db) {
-    return;
-  }
+export const openDb = (): Promise<void> => {
+  return new Promise<void>((resolve, reject) => {
+    const openReq = window.indexedDB.open("classic-pod", version);
 
-  const value = { artist: artistName, name: albumName };
-  db.transaction("albums", "readwrite").objectStore("albums").add(value);
+    openReq.addEventListener("error", e => {
+      console.error("IndexDB open error:", e);
+      reject(new Error("IndexDB open error."));
+    });
+
+    openReq.addEventListener("success", e => {
+      const _openReq = e.target as IDBRequest<IDBDatabase>;
+      db = _openReq.result;
+      resolve();
+    });
+
+    openReq.addEventListener("upgradeneeded", e => {
+      console.log(`Upgrading... old: ${e.oldVersion}, new: ${e.newVersion}`);
+
+      const _openReq = e.target as IDBRequest<IDBDatabase>;
+      db = _openReq.result;
+
+      db.createObjectStore("artists", { keyPath: "name" });
+
+      const albumStore = db.createObjectStore("albums", { keyPath: ["name", "artist"] });
+      albumStore.createIndex("artist", "artist", { unique: false });
+
+      const songStore = db.createObjectStore("songs", { keyPath: ["name", "artist", "album"] });
+      songStore.createIndex("artist-album", ["artist", "album"], { unique: false });
+    });
+  });
 };
 
-export const addSong = (artistName: string, albumName: string, songName: string) => {
-  if (!db) {
-    return;
-  }
+export const deleteAllData = (): Promise<void[]> => {
+  const stores = ["artists", "albums", "songs"];
+  const promises = stores.map<Promise<void>>(store => {
+    return new Promise<void>((resolve, reject) => {
+      if (!rejectIfDbIsNotOpened(db, reject)) {
+        return;
+      }
 
-  const value = { artist: artistName, album: albumName, name: songName };
-  db.transaction("songs", "readwrite").objectStore("songs").add(value);
+      const req = db.transaction(store, "readwrite").objectStore(store).clear();
+
+      req.addEventListener("error", e => {
+        console.error(`Delete ${store} error:`, e);
+        reject(new Error(`Delete ${store} error.`));
+      });
+
+      req.addEventListener("success", () => {
+        resolve();
+      });
+    });
+  });
+  return Promise.all(promises);
 };
 
-export const getAllArtists = (): Promise<unknown> => {
-  return new Promise<unknown>((resolve, reject) => {
-    if (!db) {
-      reject(new Error("db is not opened."));
+export const upsertArtist = (artist: ArtistEntity) => {
+  return new Promise<void>((resolve, reject) => {
+    if (!rejectIfDbIsNotOpened(db, reject)) {
+      return;
+    }
+
+    const txn = db.transaction("artists", "readwrite");
+    txn.addEventListener("complete", () => {
+      resolve();
+    });
+    txn.objectStore("artists").put(artist);
+  });
+};
+
+export const upsertAlbum = (album: AlbumEntity) => {
+  return new Promise<void>((resolve, reject) => {
+    if (!rejectIfDbIsNotOpened(db, reject)) {
+      return;
+    }
+
+    const txn = db.transaction("albums", "readwrite");
+    txn.addEventListener("complete", () => {
+      resolve();
+    });
+    txn.objectStore("albums").put(album);
+  });
+};
+
+export const upsertSong = (song: SongEntity) => {
+  return new Promise<void>((resolve, reject) => {
+    if (!rejectIfDbIsNotOpened(db, reject)) {
+      return;
+    }
+
+    const txn = db.transaction("songs", "readwrite");
+    txn.addEventListener("complete", () => {
+      resolve();
+    });
+    txn.objectStore("songs").put(song);
+  });
+};
+
+export const getAllArtists = (): Promise<ArtistEntity[]> => {
+  return new Promise<ArtistEntity[]>((resolve, reject) => {
+    if (!rejectIfDbIsNotOpened(db, reject)) {
       return;
     }
 
@@ -65,11 +121,41 @@ export const getAllArtists = (): Promise<unknown> => {
 
     req.addEventListener("error", e => {
       console.error("getAllArtists error:", e);
-      reject(new Error("getAllArtists error:"));
+      reject(new Error("getAllArtists error."));
     });
 
     req.addEventListener("success", e => {
-      resolve(req.result);
+      const _req = e.target as IDBRequest<ArtistEntity[]>;
+      resolve(_req.result);
+    });
+  });
+};
+
+export const getArtistAlbums = (artistName: string): Promise<AlbumEntity[]> => {
+  return new Promise<AlbumEntity[]>((resolve, reject) => {
+    if (!rejectIfDbIsNotOpened(db, reject)) {
+      return;
+    }
+
+    const range = IDBKeyRange.only(artistName);
+    const req = db.transaction("albums").objectStore("albums").index("artist").openCursor(range);
+
+    req.addEventListener("error", e => {
+      console.error("getArtistAlbums error:", e);
+      reject(new Error("getArtistAlbums error."));
+    });
+
+    const result: AlbumEntity[] = [];
+    req.addEventListener("success", e => {
+      const _req = e.target as IDBRequest<IDBCursorWithValue>;
+      const cursor = _req.result;
+      if (cursor) {
+        const album = cursor.value as AlbumEntity;
+        result.push(album);
+        cursor.continue();
+      } else {
+        resolve(result);
+      }
     });
   });
 };

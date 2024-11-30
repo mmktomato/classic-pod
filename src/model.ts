@@ -4,20 +4,17 @@ export interface NavigationNode {
   imageUri?: string;
 }
 
-export interface Song {
-  name: string;
-  // imageUri?: string; // TODO: Should be a buffer or blob.
-  duration: number;
-}
-
-interface WithChildren<T> {
-  children: T[];
-}
-
-export interface Album extends WithChildren<Song> {
+export interface ArtistEntity {
   name: string;
 }
 
-export interface Artist extends WithChildren<Album> {
+export interface AlbumEntity {
   name: string;
+  artist: string;
+}
+
+export interface SongEntity {
+  name: string;
+  album: string;
+  artist: string;
 }
