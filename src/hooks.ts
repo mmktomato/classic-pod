@@ -1,7 +1,9 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
-import { type NavigationNode, type Artist, type Album, type Song } from "./model";
+import { type AlbumEntity, type ArtistEntity, type NavigationNode } from "./model";
 import { createMusicLibrary } from "./Modules/library";
+import { openDb, getAllArtists, getArtistAlbums, deleteAllData, getAlbumSongs } from "./Modules/db";
+import * as ls from "./Modules/localStorage";
 
 // TODO: Remove this when `showDirectoryPicker` is available in TypeScript.
 declare global {
@@ -14,78 +16,114 @@ declare global {
 
 const isShowDirectoryPickerSupported = () => "showDirectoryPicker" in window;
 
-const useRootDirectory = () => {
-  const [rootDirectory, setRootDirectory] = useState<FileSystemDirectoryHandle | undefined>(
-    undefined,
-  );
+const browseDirectory = async (): Promise<FileSystemDirectoryHandle> => {
+  if (!isShowDirectoryPickerSupported()) {
+    throw new Error("Directory picker is not supported.");
+  }
+  return await window.showDirectoryPicker();
+};
 
-  const browseDirectory = useCallback(async () => {
-    if (!isShowDirectoryPickerSupported()) {
-      return;
-    }
-    const handle = await window.showDirectoryPicker();
-
-    // TODO: Save the path to localStorage.
-    setRootDirectory(handle);
-  }, []);
-
-  return { rootDirectory, browseDirectory };
+const scanDirectory = async (rootDirectory: FileSystemDirectoryHandle) => {
+  await openDb();
+  await deleteAllData();
+  await createMusicLibrary(rootDirectory);
 };
 
 export const useNavigation = () => {
-  const { rootDirectory, browseDirectory } = useRootDirectory();
   const [navigation, setNavigation] = useState<NavigationNode[]>([]);
+  const [scaned, setScaned] = useState(ls.scaned());
 
   useEffect(() => {
-    const browseNavigation: NavigationNode = {
-      name: "Browse",
+    if (scaned) {
+      // await openDb()
+      openDb();
+    }
+
+    const scanNavigation: NavigationNode = {
+      name: "Scan",
       command: async () => {
-        if (!isShowDirectoryPickerSupported()) {
-          alert("Directory picker is not supported.");
-          return;
+        try {
+          const rootDirectory = await browseDirectory();
+
+          // TODO: Show a loading spinner.
+          ls.setScaned(false);
+          setScaned(false);
+
+          await scanDirectory(rootDirectory);
+
+          ls.setScaned(true);
+          setScaned(true);
+        } catch (e: unknown) {
+          if (e instanceof Error) {
+            alert(e.message);
+          } else {
+            alert("Unknown error.");
+          }
         }
-        await browseDirectory();
       },
     };
 
-    const topNavigation: NavigationNode[] = rootDirectory
+    const topNavigation: NavigationNode[] = scaned
       ? [
           {
             name: "Artists",
-            command: async () => {
-              // TODO: Show a loading spinner.
-              const lib = await createMusicLibrary(rootDirectory);
-              const artistNavigation = lib.map<NavigationNode>(artist =>
-                library2NavigationNode(artist, next => setNavigation(next)),
-              );
-              setNavigation(artistNavigation);
-            },
+            command: createAllArtistsCommand(setNavigation),
           },
-          browseNavigation,
+          scanNavigation,
         ]
-      : [browseNavigation];
+      : [scanNavigation];
     setNavigation(topNavigation);
-  }, [rootDirectory, browseDirectory]);
+  }, [scaned]);
 
   return { navigation };
 };
 
-const library2NavigationNode = (
-  item: Artist | Album | Song,
-  onNext: (navigation: NavigationNode[]) => void,
-): NavigationNode => {
-  return {
-    name: item.name,
-    imageUri: "imageUri" in item ? item.imageUri : undefined,
-    command: async () => {
-      if ("children" in item) {
-        const nextNavigation = item.children.map<NavigationNode>(child => {
-          return library2NavigationNode(child, onNext);
-        });
-        onNext(nextNavigation);
-      } else {
-        alert(item.name);
-      }
-    },
+const createAllArtistsCommand = (setNavigation: (navigation: NavigationNode[]) => void) => {
+  return async () => {
+    console.log("All artists.");
+
+    const artists = await getAllArtists();
+    // TODO: sort
+    const artistNavigation = artists.map<NavigationNode>(artist => ({
+      name: artist.name,
+      command: createArtistSelectCommand(artist, setNavigation),
+    }));
+    setNavigation(artistNavigation);
+  };
+};
+
+const createArtistSelectCommand = (
+  artist: ArtistEntity,
+  setNavigation: (navigation: NavigationNode[]) => void,
+) => {
+  return async () => {
+    console.log(`Select "${artist.name}"`);
+
+    const albums = await getArtistAlbums(artist.name);
+    // TODO: sort
+    const navigation = albums.map<NavigationNode>(album => ({
+      name: album.name,
+      command: createAlbumSelectCommand(album, setNavigation),
+    }));
+    setNavigation(navigation);
+  };
+};
+
+const createAlbumSelectCommand = (
+  album: AlbumEntity,
+  setNavigation: (navigation: NavigationNode[]) => void,
+) => {
+  return async () => {
+    console.log(`Select "${album.name}"`);
+
+    const songs = await getAlbumSongs(album);
+    // TODO: sort
+    const navigation = songs.map<NavigationNode>(song => ({
+      name: song.name,
+      command: async () => {
+        alert(song.name);
+      },
+    }));
+    setNavigation(navigation);
   };
 };
