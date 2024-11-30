@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 
-import { type ArtistEntity, type NavigationNode } from "./model";
+import { type AlbumEntity, type ArtistEntity, type NavigationNode } from "./model";
 import { createMusicLibrary } from "./Modules/library";
-import { openDb, getAllArtists, getArtistAlbums, deleteAllData } from "./Modules/db";
+import { openDb, getAllArtists, getArtistAlbums, deleteAllData, getAlbumSongs } from "./Modules/db";
 import * as ls from "./Modules/localStorage";
 
 // TODO: Remove this when `showDirectoryPicker` is available in TypeScript.
@@ -94,19 +94,36 @@ const createAllArtistsCommand = (setNavigation: (navigation: NavigationNode[]) =
 
 const createArtistSelectCommand = (
   artist: ArtistEntity,
-  onNext: (navigation: NavigationNode[]) => void,
+  setNavigation: (navigation: NavigationNode[]) => void,
 ) => {
   return async () => {
-    console.log(artist.name);
+    console.log(`Select "${artist.name}"`);
 
     const albums = await getArtistAlbums(artist.name);
     // TODO: sort
     const navigation = albums.map<NavigationNode>(album => ({
       name: album.name,
+      command: createAlbumSelectCommand(album, setNavigation),
+    }));
+    setNavigation(navigation);
+  };
+};
+
+const createAlbumSelectCommand = (
+  album: AlbumEntity,
+  setNavigation: (navigation: NavigationNode[]) => void,
+) => {
+  return async () => {
+    console.log(`Select "${album.name}"`);
+
+    const songs = await getAlbumSongs(album);
+    // TODO: sort
+    const navigation = songs.map<NavigationNode>(song => ({
+      name: song.name,
       command: async () => {
-        alert(album.name);
+        alert(song.name);
       },
     }));
-    onNext(navigation);
+    setNavigation(navigation);
   };
 };

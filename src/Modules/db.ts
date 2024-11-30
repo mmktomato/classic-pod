@@ -138,24 +138,37 @@ export const getArtistAlbums = (artistName: string): Promise<AlbumEntity[]> => {
     }
 
     const range = IDBKeyRange.only(artistName);
-    const req = db.transaction("albums").objectStore("albums").index("artist").openCursor(range);
+    const req = db.transaction("albums").objectStore("albums").index("artist").getAll(range);
 
     req.addEventListener("error", e => {
       console.error("getArtistAlbums error:", e);
       reject(new Error("getArtistAlbums error."));
     });
 
-    const result: AlbumEntity[] = [];
     req.addEventListener("success", e => {
-      const _req = e.target as IDBRequest<IDBCursorWithValue>;
-      const cursor = _req.result;
-      if (cursor) {
-        const album = cursor.value as AlbumEntity;
-        result.push(album);
-        cursor.continue();
-      } else {
-        resolve(result);
-      }
+      const _req = e.target as IDBRequest<AlbumEntity[]>;
+      resolve(_req.result);
+    });
+  });
+};
+
+export const getAlbumSongs = (album: AlbumEntity): Promise<SongEntity[]> => {
+  return new Promise<SongEntity[]>((resolve, reject) => {
+    if (!rejectIfDbIsNotOpened(db, reject)) {
+      return;
+    }
+
+    const range = IDBKeyRange.only([album.artist, album.name]);
+    const req = db.transaction("songs").objectStore("songs").index("artist-album").getAll(range);
+
+    req.addEventListener("error", e => {
+      console.error("getAlbumSongs error:", e);
+      reject(new Error("getAlbumSongs error."));
+    });
+
+    req.addEventListener("success", e => {
+      const _req = e.target as IDBRequest<SongEntity[]>;
+      resolve(_req.result);
     });
   });
 };
