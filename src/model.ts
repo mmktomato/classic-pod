@@ -6,7 +6,7 @@ export interface NavigationNode {
 
 export interface Song {
   name: string;
-  imageUri?: string; // TODO: Should be a buffer or blob.
+  // imageUri?: string; // TODO: Should be a buffer or blob.
   duration: number;
 }
 

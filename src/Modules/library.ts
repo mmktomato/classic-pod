@@ -1,8 +1,11 @@
 import { parseBlob, type IAudioMetadata } from "music-metadata";
 
+// TODO: rename _addSong
+import { openDb, addArtist, addAlbum, addSong as _addSong } from "./db";
 import { type Artist } from "../model";
 
 export const createMusicLibrary = async (rootDirectoryHandle: FileSystemDirectoryHandle) => {
+  openDb();
   const lib: Artist[] = [];
 
   await findMusicFiles(rootDirectoryHandle, async handle => {
@@ -46,6 +49,7 @@ const addSong = async (lib: Artist[], metadata: IAudioMetadata) => {
       children: [],
     };
     lib.push(artist);
+    addArtist(albumArtistStr);
   }
 
   let album = artist.children.find(album => album.name === albumTitleStr);
@@ -55,11 +59,13 @@ const addSong = async (lib: Artist[], metadata: IAudioMetadata) => {
       children: [],
     };
     artist.children.push(album);
+    addAlbum(albumArtistStr, albumTitleStr);
   }
 
   album.children.push({
     name: songTitleStr,
     duration: metadata.format.duration || 0,
-    imageUri: "",
+    // imageUri: "",
   });
+  _addSong(albumArtistStr, albumTitleStr, songTitleStr);
 };

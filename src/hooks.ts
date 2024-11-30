@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { type NavigationNode, type Artist, type Album, type Song } from "./model";
 import { createMusicLibrary } from "./Modules/library";
+import { getAllArtists } from "./Modules/db";
 
 // TODO: Remove this when `showDirectoryPicker` is available in TypeScript.
 declare global {
@@ -38,7 +39,7 @@ export const useNavigation = () => {
 
   useEffect(() => {
     const browseNavigation: NavigationNode = {
-      name: "Browse",
+      name: "Scan",
       command: async () => {
         if (!isShowDirectoryPickerSupported()) {
           alert("Directory picker is not supported.");
@@ -48,16 +49,26 @@ export const useNavigation = () => {
       },
     };
 
+    // TODO: Show "Artists" navigation if IndexedDB is already built.
     const topNavigation: NavigationNode[] = rootDirectory
       ? [
           {
             name: "Artists",
             command: async () => {
               // TODO: Show a loading spinner.
+              // TODO: Delete IndexedDB before rescan.
               const lib = await createMusicLibrary(rootDirectory);
+
+              const _artists = await getAllArtists();
+              console.log(_artists);
+
               const artistNavigation = lib.map<NavigationNode>(artist =>
-                library2NavigationNode(artist, next => setNavigation(next)),
+                library2NavigationNode(artist, next => {
+                  // TODO: sort
+                  setNavigation(next);
+                }),
               );
+              // TODO: sort
               setNavigation(artistNavigation);
             },
           },
@@ -76,7 +87,7 @@ const library2NavigationNode = (
 ): NavigationNode => {
   return {
     name: item.name,
-    imageUri: "imageUri" in item ? item.imageUri : undefined,
+    // imageUri: "imageUri" in item ? item.imageUri : undefined,
     command: async () => {
       if ("children" in item) {
         const nextNavigation = item.children.map<NavigationNode>(child => {
