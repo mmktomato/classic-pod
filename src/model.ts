@@ -1,3 +1,5 @@
+export type ViewType = "navigation" | "playback";
+
 export interface NavigationNode {
   name: string;
   command: () => Promise<void>;

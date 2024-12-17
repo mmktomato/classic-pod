@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { type AlbumEntity, type ArtistEntity, type NavigationNode } from "./model";
+import { SongEntity, type AlbumEntity, type ArtistEntity, type NavigationNode } from "./model";
 import { createMusicLibrary } from "./Modules/library";
 import { openDb, getAllArtists, getArtistAlbums, deleteAllData, getAlbumSongs } from "./Modules/db";
 import * as ls from "./Modules/localStorage";
@@ -29,7 +29,7 @@ const scanDirectory = async (rootDirectory: FileSystemDirectoryHandle) => {
   await createMusicLibrary(rootDirectory);
 };
 
-export const useNavigation = () => {
+export const useNavigation = (onSongSelected: (song: SongEntity) => void) => {
   const [navigation, setNavigation] = useState<NavigationNode[]>([]);
   const [scaned, setScaned] = useState(ls.scaned());
 
@@ -67,18 +67,21 @@ export const useNavigation = () => {
       ? [
           {
             name: "Artists",
-            command: createAllArtistsCommand(setNavigation),
+            command: createAllArtistsCommand(setNavigation, onSongSelected),
           },
           scanNavigation,
         ]
       : [scanNavigation];
     setNavigation(topNavigation);
-  }, [scaned]);
+  }, [scaned, onSongSelected]);
 
   return { navigation };
 };
 
-const createAllArtistsCommand = (setNavigation: (navigation: NavigationNode[]) => void) => {
+const createAllArtistsCommand = (
+  setNavigation: (navigation: NavigationNode[]) => void,
+  onSongSelected: (song: SongEntity) => void,
+) => {
   return async () => {
     console.log("All artists.");
 
@@ -86,7 +89,7 @@ const createAllArtistsCommand = (setNavigation: (navigation: NavigationNode[]) =
     // TODO: sort
     const artistNavigation = artists.map<NavigationNode>(artist => ({
       name: artist.name,
-      command: createArtistSelectCommand(artist, setNavigation),
+      command: createArtistSelectCommand(artist, setNavigation, onSongSelected),
     }));
     setNavigation(artistNavigation);
   };
@@ -95,6 +98,7 @@ const createAllArtistsCommand = (setNavigation: (navigation: NavigationNode[]) =
 const createArtistSelectCommand = (
   artist: ArtistEntity,
   setNavigation: (navigation: NavigationNode[]) => void,
+  onSongSelected: (song: SongEntity) => void,
 ) => {
   return async () => {
     console.log(`Select "${artist.name}"`);
@@ -103,7 +107,7 @@ const createArtistSelectCommand = (
     // TODO: sort
     const navigation = albums.map<NavigationNode>(album => ({
       name: album.name,
-      command: createAlbumSelectCommand(album, setNavigation),
+      command: createAlbumSelectCommand(album, setNavigation, onSongSelected),
     }));
     setNavigation(navigation);
   };
@@ -112,6 +116,7 @@ const createArtistSelectCommand = (
 const createAlbumSelectCommand = (
   album: AlbumEntity,
   setNavigation: (navigation: NavigationNode[]) => void,
+  onSongSelected: (song: SongEntity) => void,
 ) => {
   return async () => {
     console.log(`Select "${album.name}"`);
@@ -120,10 +125,16 @@ const createAlbumSelectCommand = (
     // TODO: sort
     const navigation = songs.map<NavigationNode>(song => ({
       name: song.name,
-      command: async () => {
-        alert(song.name);
-      },
+      command: createSongSelectCommand(song, onSongSelected),
     }));
     setNavigation(navigation);
+  };
+};
+
+const createSongSelectCommand = (song: SongEntity, onSongSelected: (song: SongEntity) => void) => {
+  return async () => {
+    console.log(`Select "${song.name}"`);
+
+    onSongSelected(song);
   };
 };

@@ -1,29 +1,52 @@
 import { clsx } from "clsx";
 
-import { ListBox } from "./ListBox";
-import { type NavigationNode } from "../model";
+import { type ViewType, type NavigationNode, type SongEntity } from "../model";
+import { NavigationPanelView } from "./PanelViews/NavigationPanelView";
+import { PlaybackPanelView } from "./PanelViews/PlaybackPanelView";
 
 interface PanelProps {
+  type: ViewType;
   className?: string;
   navigation: NavigationNode[];
   selectedIndex: number;
+  song?: SongEntity;
 }
 
-export const Panel: React.FC<PanelProps> = ({ className, navigation, selectedIndex }) => {
-  const selectedItem = navigation.at(selectedIndex);
+export const Panel: React.FC<PanelProps> = ({
+  type,
+  className,
+  navigation,
+  selectedIndex,
+  song,
+}) => {
   return (
     <div className={clsx(className, "bg-white", "border-2", "rounded-md", "border-gray-600")}>
-      <div className={clsx("flex", "justify-between", "h-full", "rounded-sm")}>
-        <div className={clsx("w-1/2")}>
-          <ListBox
-            navigation={navigation}
-            selectedIndex={selectedIndex}
-          />
-        </div>
-        <div className={clsx("w-1/2", "flex", "items-center")}>
-          {selectedItem?.imageUri && <img src={selectedItem.imageUri} />}
-        </div>
-      </div>
+      <PanelContent
+        type={type}
+        navigation={navigation}
+        selectedIndex={selectedIndex}
+        song={song}
+      />
     </div>
   );
+};
+
+const PanelContent: React.FC<Omit<PanelProps, "className">> = ({
+  type,
+  navigation,
+  selectedIndex,
+  song,
+}) => {
+  if (type === "navigation") {
+    return (
+      <NavigationPanelView
+        navigation={navigation}
+        selectedIndex={selectedIndex}
+      />
+    );
+  }
+  if (type === "playback" && !!song) {
+    return <PlaybackPanelView song={song} />;
+  }
+  return null;
 };

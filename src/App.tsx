@@ -1,16 +1,26 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { clsx } from "clsx";
 import { type ClickWheelerRotateEvent, type ClickWheelerTapEvent } from "click-wheeler";
 
 import { Panel } from "./Components/Panel";
 import { ClickWheeler } from "./Components/ClickWheeler";
 import { useNavigation } from "./hooks";
+import { type ViewType, type SongEntity } from "./model";
 
 export const App: React.FC<unknown> = () => {
-  const { navigation } = useNavigation();
-
   // TODO: Move to a hook.
+  const [viewType, setViewType] = useState<ViewType>("navigation");
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
+  const [song, setSong] = useState<SongEntity | undefined>(undefined);
+  const onSongSelected = useCallback(
+    (song: SongEntity) => {
+      setViewType("playback");
+      setSong(song);
+    },
+    [setViewType, setSong],
+  );
+
+  const { navigation } = useNavigation(onSongSelected);
 
   const onRotate = (e: ClickWheelerRotateEvent) => {
     if (!navigation.length) {
@@ -48,9 +58,11 @@ export const App: React.FC<unknown> = () => {
         )}
       >
         <Panel
+          type={viewType}
           className={clsx("h-45p")}
           navigation={navigation}
           selectedIndex={selectedIndex}
+          song={song}
         />
         <ClickWheeler
           size={240}
