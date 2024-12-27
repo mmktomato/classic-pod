@@ -1,43 +1,32 @@
+import { useContext } from "react";
 import { clsx } from "clsx";
 
-import { type ViewType, type NavigationNode, type SongEntity } from "../model";
+import { type NavigationNode } from "../model";
+import { topContext } from "../Modules/context";
 import { NavigationPanelView } from "./PanelViews/NavigationPanelView";
 import { PlaybackPanelView } from "./PanelViews/PlaybackPanelView";
 
 interface PanelProps {
-  type: ViewType;
   className?: string;
   navigation: NavigationNode[];
   selectedIndex: number;
-  song?: SongEntity;
 }
 
-export const Panel: React.FC<PanelProps> = ({
-  type,
-  className,
-  navigation,
-  selectedIndex,
-  song,
-}) => {
+export const Panel: React.FC<PanelProps> = ({ className, navigation, selectedIndex }) => {
   return (
     <div className={clsx(className, "bg-white", "border-2", "rounded-md", "border-gray-600")}>
       <PanelContent
-        type={type}
         navigation={navigation}
         selectedIndex={selectedIndex}
-        song={song}
       />
     </div>
   );
 };
 
-const PanelContent: React.FC<Omit<PanelProps, "className">> = ({
-  type,
-  navigation,
-  selectedIndex,
-  song,
-}) => {
-  if (type === "navigation") {
+const PanelContent: React.FC<Omit<PanelProps, "className">> = ({ navigation, selectedIndex }) => {
+  const { viewType, song } = useContext(topContext);
+
+  if (viewType === "navigation") {
     return (
       <NavigationPanelView
         navigation={navigation}
@@ -45,7 +34,7 @@ const PanelContent: React.FC<Omit<PanelProps, "className">> = ({
       />
     );
   }
-  if (type === "playback" && !!song) {
+  if (viewType === "playback" && !!song) {
     return <PlaybackPanelView song={song} />;
   }
   return null;

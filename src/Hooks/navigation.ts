@@ -1,9 +1,15 @@
 import { useEffect, useState } from "react";
 
-import { SongEntity, type AlbumEntity, type ArtistEntity, type NavigationNode } from "./model";
-import { createMusicLibrary } from "./Modules/library";
-import { openDb, getAllArtists, getArtistAlbums, deleteAllData, getAlbumSongs } from "./Modules/db";
-import * as ls from "./Modules/localStorage";
+import { SongEntity, type AlbumEntity, type ArtistEntity, type NavigationNode } from "../model";
+import { createMusicLibrary } from "../Modules/library";
+import {
+  openDb,
+  getAllArtists,
+  getArtistAlbums,
+  deleteAllData,
+  getAlbumSongs,
+} from "../Modules/db";
+import * as ls from "../Modules/localStorage";
 
 // TODO: Remove this when `showDirectoryPicker` is available in TypeScript.
 declare global {
