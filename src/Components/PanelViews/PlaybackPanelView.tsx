@@ -1,9 +1,13 @@
-import { type SongEntity } from "../../model";
+import { useContext } from "react";
 
-interface PlaybackPanelViewProps {
-  song: SongEntity;
-}
+import { topContext } from "../../Modules/context";
 
-export const PlaybackPanelView: React.FC<PlaybackPanelViewProps> = ({ song }) => {
+export const PlaybackPanelView: React.FC<unknown> = () => {
+  const { song } = useContext(topContext);
+
+  if (!song) {
+    return null;
+  }
+
   return <div>{song.name}</div>;
 };

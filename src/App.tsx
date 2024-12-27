@@ -1,46 +1,22 @@
-import { useState, useCallback, useContext } from "react";
+import { useContext, useEffect } from "react";
 import { clsx } from "clsx";
-import { type ClickWheelerRotateEvent, type ClickWheelerTapEvent } from "click-wheeler";
 
 import { Panel } from "./Components/Panel";
 import { ClickWheeler } from "./Components/ClickWheeler";
-import { useNavigation } from "./Hooks/navigation";
-import { topDispatchContext } from "./Modules/context";
-import { type SongEntity } from "./model";
+import { usePanelView } from "./Hooks/panelview";
+import { topContext } from "./Modules/context";
+import { openDb } from "./Modules/db";
 
 export const App: React.FC<unknown> = () => {
-  const dispatch = useContext(topDispatchContext);
+  const { scaned } = useContext(topContext);
+  const { current, onRotate, onTap } = usePanelView();
 
-  // TODO: Move to a hook.
-  const [selectedIndex, setSelectedIndex] = useState<number>(0);
-  const onSongSelected = useCallback(
-    (song: SongEntity) => {
-      dispatch({ type: "viewType", action: "playback" });
-      dispatch({ type: "song", action: song });
-    },
-    [dispatch],
-  );
-
-  const { navigation } = useNavigation(onSongSelected);
-
-  const onRotate = (e: ClickWheelerRotateEvent) => {
-    if (!navigation.length) {
-      return;
+  useEffect(() => {
+    if (scaned) {
+      // await openDb();
+      openDb();
     }
-    const lastIndex = navigation.length - 1;
-    const nextIndex = Math.min(
-      lastIndex,
-      Math.max(0, selectedIndex + (e.detail.direction === "clockwise" ? 1 : -1)),
-    );
-    setSelectedIndex(nextIndex);
-  };
-
-  const onTap = (e: ClickWheelerTapEvent) => {
-    console.log(e.detail.type, e.detail.tapArea);
-
-    const selectedNode = navigation.at(selectedIndex);
-    selectedNode?.command();
-  };
+  }, [scaned]);
 
   return (
     <main className={clsx("w-screen", "h-screen", "flex", "justify-center", "items-center")}>
@@ -58,11 +34,12 @@ export const App: React.FC<unknown> = () => {
           "shadow-2xl",
         )}
       >
-        <Panel
-          className={clsx("h-45p")}
-          navigation={navigation}
-          selectedIndex={selectedIndex}
-        />
+        {current && (
+          <Panel
+            className={clsx("h-45p")}
+            panelView={current}
+          />
+        )}
         <ClickWheeler
           size={240}
           className={clsx("flex-grow")}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { type ClickWheelerRotateEvent, type ClickWheelerTapEvent } from "click-wheeler";
 
 import { SongEntity, type AlbumEntity, type ArtistEntity, type NavigationNode } from "../model";
 import { createMusicLibrary } from "../Modules/library";
@@ -35,57 +35,51 @@ const scanDirectory = async (rootDirectory: FileSystemDirectoryHandle) => {
   await createMusicLibrary(rootDirectory);
 };
 
-export const useNavigation = (onSongSelected: (song: SongEntity) => void) => {
-  const [navigation, setNavigation] = useState<NavigationNode[]>([]);
-  const [scaned, setScaned] = useState(ls.scaned());
+export const createTopNavigation = (
+  scaned: boolean,
+  setScaned: (scaned: boolean) => void,
+  onNextNavigation: (navigation: NavigationNode[]) => void,
+  onSongSelected: (song: SongEntity) => void,
+) => {
+  const scanNavigation: NavigationNode = {
+    name: "Scan",
+    command: async () => {
+      try {
+        const rootDirectory = await browseDirectory();
 
-  useEffect(() => {
-    if (scaned) {
-      // await openDb()
-      openDb();
-    }
+        // TODO: Show a loading spinner.
+        ls.setScaned(false);
+        setScaned(false);
 
-    const scanNavigation: NavigationNode = {
-      name: "Scan",
-      command: async () => {
-        try {
-          const rootDirectory = await browseDirectory();
+        await scanDirectory(rootDirectory);
 
-          // TODO: Show a loading spinner.
-          ls.setScaned(false);
-          setScaned(false);
-
-          await scanDirectory(rootDirectory);
-
-          ls.setScaned(true);
-          setScaned(true);
-        } catch (e: unknown) {
-          if (e instanceof Error) {
-            alert(e.message);
-          } else {
-            alert("Unknown error.");
-          }
+        ls.setScaned(true);
+        setScaned(true);
+      } catch (e: unknown) {
+        if (e instanceof Error) {
+          alert(e.message);
+        } else {
+          alert("Unknown error.");
         }
-      },
-    };
+      }
+    },
+  };
 
-    const topNavigation: NavigationNode[] = scaned
-      ? [
-          {
-            name: "Artists",
-            command: createAllArtistsCommand(setNavigation, onSongSelected),
-          },
-          scanNavigation,
-        ]
-      : [scanNavigation];
-    setNavigation(topNavigation);
-  }, [scaned, onSongSelected]);
+  const topNavigation: NavigationNode[] = scaned
+    ? [
+        {
+          name: "Artists",
+          command: createAllArtistsCommand(onNextNavigation, onSongSelected),
+        },
+        scanNavigation,
+      ]
+    : [scanNavigation];
 
-  return { navigation };
+  return topNavigation;
 };
 
 const createAllArtistsCommand = (
-  setNavigation: (navigation: NavigationNode[]) => void,
+  onNextNavigation: (navigation: NavigationNode[]) => void,
   onSongSelected: (song: SongEntity) => void,
 ) => {
   return async () => {
@@ -95,15 +89,15 @@ const createAllArtistsCommand = (
     // TODO: sort
     const artistNavigation = artists.map<NavigationNode>(artist => ({
       name: artist.name,
-      command: createArtistSelectCommand(artist, setNavigation, onSongSelected),
+      command: createArtistSelectCommand(artist, onNextNavigation, onSongSelected),
     }));
-    setNavigation(artistNavigation);
+    onNextNavigation(artistNavigation);
   };
 };
 
 const createArtistSelectCommand = (
   artist: ArtistEntity,
-  setNavigation: (navigation: NavigationNode[]) => void,
+  onNextNavigation: (navigation: NavigationNode[]) => void,
   onSongSelected: (song: SongEntity) => void,
 ) => {
   return async () => {
@@ -113,15 +107,15 @@ const createArtistSelectCommand = (
     // TODO: sort
     const navigation = albums.map<NavigationNode>(album => ({
       name: album.name,
-      command: createAlbumSelectCommand(album, setNavigation, onSongSelected),
+      command: createAlbumSelectCommand(album, onNextNavigation, onSongSelected),
     }));
-    setNavigation(navigation);
+    onNextNavigation(navigation);
   };
 };
 
 const createAlbumSelectCommand = (
   album: AlbumEntity,
-  setNavigation: (navigation: NavigationNode[]) => void,
+  onNextNavigation: (navigation: NavigationNode[]) => void,
   onSongSelected: (song: SongEntity) => void,
 ) => {
   return async () => {
@@ -133,7 +127,7 @@ const createAlbumSelectCommand = (
       name: song.name,
       command: createSongSelectCommand(song, onSongSelected),
     }));
-    setNavigation(navigation);
+    onNextNavigation(navigation);
   };
 };
 
@@ -143,4 +137,31 @@ const createSongSelectCommand = (song: SongEntity, onSongSelected: (song: SongEn
 
     onSongSelected(song);
   };
+};
+
+export const onRotate = (
+  e: ClickWheelerRotateEvent,
+  navigation: NavigationNode[],
+  selectedIndex: number,
+): number => {
+  if (!navigation.length) {
+    return -1;
+  }
+  const lastIndex = navigation.length - 1;
+  const nextIndex = Math.min(
+    lastIndex,
+    Math.max(0, selectedIndex + (e.detail.direction === "clockwise" ? 1 : -1)),
+  );
+  return nextIndex;
+};
+
+export const onTap = (
+  e: ClickWheelerTapEvent,
+  navigation: NavigationNode[],
+  selectedIndex: number,
+) => {
+  console.log(e.detail.type, e.detail.tapArea);
+
+  const selectedNode = navigation.at(selectedIndex);
+  selectedNode?.command();
 };

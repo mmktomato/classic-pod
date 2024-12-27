@@ -1,24 +1,31 @@
 import { createContext, Dispatch } from "react";
 
 import { ViewType, SongEntity } from "../model";
-
-type ActionType =
-  | {
-      type: "viewType";
-      action: ViewType;
-    }
-  | {
-      type: "song";
-      action: SongEntity | undefined;
-    };
+import * as ls from "./localStorage";
 
 interface TopContext {
+  scaned: boolean;
   viewType: ViewType;
   song?: SongEntity;
 }
 
+type ActionType =
+  | {
+      type: "scaned";
+      value: boolean;
+    }
+  | {
+      type: "viewType";
+      value: ViewType;
+    }
+  | {
+      type: "song";
+      value: SongEntity | undefined;
+    };
+
 export const initialState: TopContext = {
   viewType: "navigation",
+  scaned: ls.scaned(),
 };
 
 export const topContext = createContext<TopContext>(initialState);
@@ -26,12 +33,17 @@ export const topDispatchContext = createContext<Dispatch<ActionType>>(() => {});
 
 export const reducer = (state: TopContext, action: ActionType): TopContext => {
   switch (action.type) {
+    case "scaned":
+      ls.setScaned(action.value);
+      return { ...state, scaned: action.value };
+
     case "viewType":
-      state.viewType = action.action;
-      return state;
+      if (state.viewType === action.value) {
+        return state;
+      }
+      return { ...state, viewType: action.value };
 
     case "song":
-      state.song = action.action;
-      return state;
+      return { ...state, song: action.value };
   }
 };
