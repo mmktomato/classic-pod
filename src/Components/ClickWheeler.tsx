@@ -15,10 +15,14 @@ export const ClickWheeler: React.FC<ClickWheelerProps> = ({
   onRotate,
   onTap,
 }) => {
+  const requireShiftToRotate = !navigator.userAgent.toLowerCase().includes("mobile");
+  console.log("requireShiftToRotate:", requireShiftToRotate);
+
   return (
     <div className={clsx(className, "flex", "justify-center", "items-center")}>
       <ClickWheelerComponent
         size={size}
+        requireShiftToRotate={requireShiftToRotate}
         onRotate={onRotate}
         onTap={onTap}
       />
