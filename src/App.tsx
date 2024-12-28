@@ -42,7 +42,7 @@ export const App: React.FC<unknown> = () => {
         )}
         <ClickWheeler
           size={240}
-          className={clsx("flex-grow")}
+          className={"flex-grow"}
           onRotate={onRotate}
           onTap={onTap}
         />

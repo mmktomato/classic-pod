@@ -50,32 +50,38 @@ export const usePanelView = () => {
     [dispatch],
   );
 
-  const onRotate = (e: ClickWheelerRotateEvent) => {
-    if (!current) {
-      return;
-    }
+  const onRotate = useCallback(
+    (e: ClickWheelerRotateEvent) => {
+      if (!current) {
+        return;
+      }
 
-    if (viewType === "navigation") {
-      const { navigation, selectedIndex } = current.props as React.ComponentProps<
-        typeof NavigationPanelView
-      >;
-      const nextIndex = _onRotateForNavigation(e, navigation, selectedIndex);
-      updateCurrentNavigationPanelView(navigation, nextIndex);
-    }
-  };
+      if (viewType === "navigation") {
+        const { navigation, selectedIndex } = current.props as React.ComponentProps<
+          typeof NavigationPanelView
+        >;
+        const nextIndex = _onRotateForNavigation(e, navigation, selectedIndex);
+        updateCurrentNavigationPanelView(navigation, nextIndex);
+      }
+    },
+    [updateCurrentNavigationPanelView, current, viewType],
+  );
 
-  const onTap = (e: ClickWheelerTapEvent) => {
-    if (!current) {
-      return;
-    }
+  const onTap = useCallback(
+    (e: ClickWheelerTapEvent) => {
+      if (!current) {
+        return;
+      }
 
-    if (viewType === "navigation") {
-      const { navigation, selectedIndex } = current.props as React.ComponentProps<
-        typeof NavigationPanelView
-      >;
-      _onTapForNavigation(e, navigation, selectedIndex);
-    }
-  };
+      if (viewType === "navigation") {
+        const { navigation, selectedIndex } = current.props as React.ComponentProps<
+          typeof NavigationPanelView
+        >;
+        _onTapForNavigation(e, navigation, selectedIndex);
+      }
+    },
+    [current, viewType],
+  );
 
   useEffect(() => {
     const topNavigation = createTopNavigation(
