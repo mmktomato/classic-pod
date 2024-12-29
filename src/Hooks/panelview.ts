@@ -15,7 +15,7 @@ export const usePanelView = () => {
   const { scaned } = useContext(topContext);
   const dispatch = useContext(topDispatchContext);
   const [viewStack, setViewStack] = useState<PanelView[]>([]);
-  const currentPanelView = viewStack.at(-1)!;
+  const currentPanelView = viewStack.at(-1);
 
   const pushNewNavigationPanelView = useCallback((navigation: NavigationNode[]) => {
     const navigationPanelView = createNavigationPanelView(navigation, 0);
@@ -24,6 +24,10 @@ export const usePanelView = () => {
 
   const updateCurrentNavigationPanelView = useCallback(
     (navigation: NavigationNode[], selectedIndex: number) => {
+      if (!currentPanelView) {
+        return;
+      }
+
       setViewStack(current => {
         if (currentPanelView.type === "navigation") {
           const newCurrent = createNavigationPanelView(navigation, selectedIndex);
@@ -53,12 +57,18 @@ export const usePanelView = () => {
 
   const onRotate = useCallback(
     (e: ClickWheelerRotateEvent) => {
+      if (!currentPanelView) {
+        return;
+      }
+
       if (currentPanelView.type === "navigation") {
         const { navigation, selectedIndex } = currentPanelView.props as React.ComponentProps<
           typeof NavigationPanelView
         >;
         const nextIndex = _onRotateForNavigation(e, navigation, selectedIndex);
-        updateCurrentNavigationPanelView(navigation, nextIndex);
+        if (selectedIndex !== nextIndex) {
+          updateCurrentNavigationPanelView(navigation, nextIndex);
+        }
       }
     },
     [updateCurrentNavigationPanelView, currentPanelView],
@@ -66,6 +76,10 @@ export const usePanelView = () => {
 
   const onTap = useCallback(
     (e: ClickWheelerTapEvent) => {
+      if (!currentPanelView) {
+        return;
+      }
+
       switch (e.detail.tapArea) {
         case "center":
           if (currentPanelView.type === "navigation") {
