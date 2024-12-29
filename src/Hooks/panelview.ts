@@ -73,14 +73,24 @@ export const usePanelView = () => {
         return;
       }
 
-      if (viewType === "navigation") {
-        const { navigation, selectedIndex } = current.props as React.ComponentProps<
-          typeof NavigationPanelView
-        >;
-        _onTapForNavigation(e, navigation, selectedIndex);
+      switch (e.detail.tapArea) {
+        case "center":
+          if (viewType === "navigation") {
+            const { navigation, selectedIndex } = current.props as React.ComponentProps<
+              typeof NavigationPanelView
+            >;
+            _onTapForNavigation(e, navigation, selectedIndex);
+          }
+          break;
+
+        case "menu":
+          if (1 < viewStack.length) {
+            setViewStack(current => current.slice(0, -1));
+          }
+          break;
       }
     },
-    [current, viewType],
+    [current, viewType, viewStack],
   );
 
   useEffect(() => {
