@@ -6,30 +6,26 @@ import {
   onRotate as _onRotateForNavigation,
   onTap as _onTapForNavigation,
 } from "./navigation";
-import { type PanelView, type NavigationNode, SongEntity } from "../model";
+import { type PanelView, type NavigationNode, type SongEntity } from "../model";
 import { topContext, topDispatchContext } from "../Modules/context";
 import { NavigationPanelView } from "../Components/PanelViews/NavigationPanelView";
 import { PlaybackPanelView } from "../Components/PanelViews/PlaybackPanelView";
 
 export const usePanelView = () => {
-  const { viewType, scaned } = useContext(topContext);
+  const { scaned } = useContext(topContext);
   const dispatch = useContext(topDispatchContext);
   const [viewStack, setViewStack] = useState<PanelView[]>([]);
-  const current = viewStack.at(-1);
+  const currentPanelView = viewStack.at(-1)!;
 
-  const pushNewNavigationPanelView = useCallback(
-    (navigation: NavigationNode[]) => {
-      const navigationPanelView = createNavigationPanelView(navigation, 0);
-      dispatch({ type: "viewType", value: "navigation" });
-      setViewStack(current => [...current, navigationPanelView]);
-    },
-    [dispatch],
-  );
+  const pushNewNavigationPanelView = useCallback((navigation: NavigationNode[]) => {
+    const navigationPanelView = createNavigationPanelView(navigation, 0);
+    setViewStack(current => [...current, navigationPanelView]);
+  }, []);
 
   const updateCurrentNavigationPanelView = useCallback(
     (navigation: NavigationNode[], selectedIndex: number) => {
       setViewStack(current => {
-        if (viewType === "navigation") {
+        if (currentPanelView.type === "navigation") {
           const newCurrent = createNavigationPanelView(navigation, selectedIndex);
           return [...current.slice(0, -1), newCurrent];
         } else {
@@ -37,60 +33,55 @@ export const usePanelView = () => {
         }
       });
     },
-    [viewType],
+    [currentPanelView],
   );
 
   const pushNewPlaybackPanelView = useCallback(
     (song: SongEntity) => {
       const playbackPanelView = createPlaybackPanelView();
-      dispatch({ type: "viewType", value: "playback" });
       dispatch({ type: "song", value: song });
       setViewStack(current => [...current, playbackPanelView]);
     },
     [dispatch],
   );
 
+  const popPanelView = useCallback(() => {
+    if (1 < viewStack.length) {
+      setViewStack(current => current.slice(0, -1));
+    }
+  }, [viewStack]);
+
   const onRotate = useCallback(
     (e: ClickWheelerRotateEvent) => {
-      if (!current) {
-        return;
-      }
-
-      if (viewType === "navigation") {
-        const { navigation, selectedIndex } = current.props as React.ComponentProps<
+      if (currentPanelView.type === "navigation") {
+        const { navigation, selectedIndex } = currentPanelView.props as React.ComponentProps<
           typeof NavigationPanelView
         >;
         const nextIndex = _onRotateForNavigation(e, navigation, selectedIndex);
         updateCurrentNavigationPanelView(navigation, nextIndex);
       }
     },
-    [updateCurrentNavigationPanelView, current, viewType],
+    [updateCurrentNavigationPanelView, currentPanelView],
   );
 
   const onTap = useCallback(
     (e: ClickWheelerTapEvent) => {
-      if (!current) {
-        return;
-      }
-
       switch (e.detail.tapArea) {
         case "center":
-          if (viewType === "navigation") {
-            const { navigation, selectedIndex } = current.props as React.ComponentProps<
+          if (currentPanelView.type === "navigation") {
+            const { navigation, selectedIndex } = currentPanelView.props as React.ComponentProps<
               typeof NavigationPanelView
             >;
-            _onTapForNavigation(e, navigation, selectedIndex);
+            _onTapForNavigation(navigation, selectedIndex);
           }
           break;
 
         case "menu":
-          if (1 < viewStack.length) {
-            setViewStack(current => current.slice(0, -1));
-          }
+          popPanelView();
           break;
       }
     },
-    [current, viewType, viewStack],
+    [currentPanelView, popPanelView],
   );
 
   useEffect(() => {
@@ -103,7 +94,7 @@ export const usePanelView = () => {
     pushNewNavigationPanelView(topNavigation);
   }, [scaned, dispatch, pushNewNavigationPanelView, pushNewPlaybackPanelView]);
 
-  return { current, onRotate, onTap };
+  return { current: currentPanelView, onRotate, onTap };
 };
 
 const createNavigationPanelView = (
@@ -111,6 +102,7 @@ const createNavigationPanelView = (
   selectedIndex: number,
 ): PanelView<typeof NavigationPanelView> => {
   return {
+    type: "navigation",
     Component: NavigationPanelView,
     props: {
       navigation,
@@ -119,8 +111,9 @@ const createNavigationPanelView = (
   };
 };
 
-const createPlaybackPanelView = () => {
+const createPlaybackPanelView = (): PanelView<typeof PlaybackPanelView> => {
   return {
+    type: "playback",
     Component: PlaybackPanelView,
     props: {},
   };

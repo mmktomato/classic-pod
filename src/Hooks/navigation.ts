@@ -1,4 +1,4 @@
-import { type ClickWheelerRotateEvent, type ClickWheelerTapEvent } from "click-wheeler";
+import { type ClickWheelerRotateEvent } from "click-wheeler";
 
 import { SongEntity, type AlbumEntity, type ArtistEntity, type NavigationNode } from "../model";
 import { createMusicLibrary } from "../Modules/library";
@@ -155,13 +155,7 @@ export const onRotate = (
   return nextIndex;
 };
 
-export const onTap = (
-  e: ClickWheelerTapEvent,
-  navigation: NavigationNode[],
-  selectedIndex: number,
-) => {
-  console.log(e.detail.type, e.detail.tapArea);
-
+export const onTap = (navigation: NavigationNode[], selectedIndex: number) => {
   const selectedNode = navigation.at(selectedIndex);
   selectedNode?.command();
 };
