@@ -12,12 +12,13 @@ interface PanelProps {
 }
 
 export const Panel: React.FC<PanelProps> = ({ className, clickWheelerRef }) => {
-  const { viewType } = useContext(topContext);
+  const { panelViewType } = useContext(topContext);
+  const viewType = panelViewType.view;
 
   return (
     <div className={clsx(className, "bg-white", "border-2", "rounded-md", "border-gray-600")}>
       {viewType === "navigation" && <NavigationPanelView clickWheelerRef={clickWheelerRef} />}
-      {viewType === "playback" && <PlaybackPanelView />}
+      {viewType === "playback" && <PlaybackPanelView clickWheelerRef={clickWheelerRef} />}
     </div>
   );
 };
