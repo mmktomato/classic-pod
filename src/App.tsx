@@ -1,15 +1,15 @@
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { clsx } from "clsx";
+import { type HTMLClickWheelerElement } from "click-wheeler";
 
 import { Panel } from "./Components/Panel";
 import { ClickWheeler } from "./Components/ClickWheeler";
-import { usePanelView } from "./Hooks/panelview";
 import { topContext } from "./Modules/context";
 import { openDb } from "./Modules/db";
 
 export const App: React.FC<unknown> = () => {
   const { scaned } = useContext(topContext);
-  const { current, onRotate, onTap } = usePanelView();
+  const clickWheelerRef = useRef<HTMLClickWheelerElement>(null);
 
   useEffect(() => {
     if (scaned) {
@@ -34,17 +34,14 @@ export const App: React.FC<unknown> = () => {
           "shadow-2xl",
         )}
       >
-        {current && (
-          <Panel
-            className={clsx("h-45p")}
-            panelView={current}
-          />
-        )}
+        <Panel
+          className={clsx("h-45p")}
+          clickWheelerRef={clickWheelerRef}
+        />
         <ClickWheeler
           size={240}
           className={"flex-grow"}
-          onRotate={onRotate}
-          onTap={onTap}
+          clickWheelerRef={clickWheelerRef}
         />
       </div>
     </main>

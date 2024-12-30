@@ -1,19 +1,17 @@
 import { clsx } from "clsx";
-import { type ClickWheelerRotateEvent, type ClickWheelerTapEvent } from "click-wheeler";
+import { type HTMLClickWheelerElement } from "click-wheeler";
 import { ClickWheelerComponent } from "click-wheeler/react";
 
 interface ClickWheelerProps {
   size?: number;
   className?: string;
-  onRotate: (e: ClickWheelerRotateEvent) => void;
-  onTap: (e: ClickWheelerTapEvent) => void;
+  clickWheelerRef: React.RefObject<HTMLClickWheelerElement>;
 }
 
 export const ClickWheeler: React.FC<ClickWheelerProps> = ({
   size = 200,
   className,
-  onRotate,
-  onTap,
+  clickWheelerRef,
 }) => {
   const requireShiftToRotate = !navigator.userAgent.toLowerCase().includes("mobile");
   console.log("requireShiftToRotate:", requireShiftToRotate);
@@ -23,8 +21,7 @@ export const ClickWheeler: React.FC<ClickWheelerProps> = ({
       <ClickWheelerComponent
         size={size}
         requireShiftToRotate={requireShiftToRotate}
-        onRotate={onRotate}
-        onTap={onTap}
+        ref={clickWheelerRef}
       />
     </div>
   );

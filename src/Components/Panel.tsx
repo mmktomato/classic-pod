@@ -1,16 +1,23 @@
+import { useContext } from "react";
 import { clsx } from "clsx";
+import { type HTMLClickWheelerElement } from "click-wheeler";
 
-import { type PanelView } from "../model";
+import { NavigationPanelView } from "./PanelViews/NavigationPanelView";
+import { PlaybackPanelView } from "./PanelViews/PlaybackPanelView";
+import { topContext } from "../Modules/context";
 
 interface PanelProps {
   className?: string;
-  panelView: PanelView;
+  clickWheelerRef: React.RefObject<HTMLClickWheelerElement>;
 }
 
-export const Panel: React.FC<PanelProps> = ({ className, panelView }) => {
+export const Panel: React.FC<PanelProps> = ({ className, clickWheelerRef }) => {
+  const { viewType } = useContext(topContext);
+
   return (
     <div className={clsx(className, "bg-white", "border-2", "rounded-md", "border-gray-600")}>
-      <panelView.Component {...panelView.props} />
+      {viewType === "navigation" && <NavigationPanelView clickWheelerRef={clickWheelerRef} />}
+      {viewType === "playback" && <PlaybackPanelView />}
     </div>
   );
 };

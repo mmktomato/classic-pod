@@ -1,15 +1,10 @@
 export type ViewType = "navigation" | "playback";
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface PanelView<TComponent extends React.ComponentType<any> = React.ComponentType<any>> {
-  type: ViewType;
-  Component: TComponent;
-  props: React.ComponentProps<TComponent>;
-}
+export type NavigationType = "top" | "artists" | "albums" | "songs";
 
 export interface NavigationNode {
   name: string;
-  command: () => Promise<void>;
+  handleSelect: () => Promise<void>;
+  handleBack: () => Promise<void>;
   imageUri?: string;
 }
 
