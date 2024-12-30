@@ -1,6 +1,15 @@
 export type ViewType = "navigation" | "playback";
 export type NavigationType = "top" | "artists" | "albums" | "songs";
 
+interface PanelViewTypeBase<TView extends ViewType> {
+  view: TView;
+}
+export interface NavigationPanelViewType extends PanelViewTypeBase<"navigation"> {
+  navigation: NavigationType;
+}
+export type PlaybackPanelViewType = PanelViewTypeBase<"playback">;
+export type PanelViewType = NavigationPanelViewType | PlaybackPanelViewType;
+
 export interface NavigationNode {
   name: string;
   handleSelect: () => Promise<void>;

@@ -1,22 +1,22 @@
 import { createContext, type Dispatch } from "react";
 
-import { type ViewType, type SongEntity } from "../model";
+import { type PanelViewType, type SongEntity } from "../model";
 import * as ls from "./localStorage";
 
 interface TopContext {
   scaned: boolean;
-  viewType: ViewType;
+  panelViewType: PanelViewType;
   song?: SongEntity;
 }
 
-export type ActionType =
+type ActionType =
   | {
       type: "scaned";
       value: boolean;
     }
   | {
-      type: "viewType";
-      value: ViewType;
+      type: "panelViewType";
+      value: PanelViewType;
     }
   | {
       type: "song";
@@ -24,7 +24,7 @@ export type ActionType =
     };
 
 export const initialState: TopContext = {
-  viewType: "navigation",
+  panelViewType: { view: "navigation", navigation: "top" },
   scaned: ls.scaned(),
 };
 
@@ -37,11 +37,8 @@ export const reducer = (state: TopContext, action: ActionType): TopContext => {
       ls.setScaned(action.value);
       return { ...state, scaned: action.value };
 
-    case "viewType":
-      if (state.viewType === action.value) {
-        return state;
-      }
-      return { ...state, viewType: action.value };
+    case "panelViewType":
+      return { ...state, panelViewType: action.value };
 
     case "song":
       return { ...state, song: action.value };

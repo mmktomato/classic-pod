@@ -3,7 +3,7 @@ import { clsx } from "clsx";
 import {
   type HTMLClickWheelerElement,
   type ClickWheelerRotateEvent,
-  ClickWheelerTapEvent,
+  type ClickWheelerTapEvent,
 } from "click-wheeler";
 
 import { useNavigation } from "../../Hooks/navigation";
